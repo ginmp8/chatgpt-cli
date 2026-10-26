@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatgpt-cli-pandacode"
+version = "0.1.0"
+description = "Transparent, local Codex CLI bridge for PandaCode Extended"
+requires-python = ">=3.10"
+dependencies = ["click>=8,<9"]
+
+[project.scripts]
+chatgpt-cli = "chatgpt_cli.main:main"
+
+[tool.setuptools.packages.find]
+include = ["chatgpt_cli*"]

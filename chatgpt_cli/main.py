@@ -80,6 +80,27 @@ def status(ctx: click.Context) -> None:
         click.echo("Authentication: not checked")
 
 
+@cli.command()
+@click.option("--model", required=True, help="Explicit model ID returned by Codex model/list.")
+@click.option("--prompt", required=True, help="Short prompt sent to the actual selected model.")
+@click.option("--cwd", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path),
+              help="Existing read-only test workspace.")
+@click.option("--timeout", default=90.0, type=click.FloatRange(min=2, max=300))
+@click.pass_context
+def smoke(ctx: click.Context, model: str, prompt: str, cwd: Path, timeout: float) -> None:
+    """Run one read-only model turn and require a completed, nonempty response."""
+    from .smoke import SmokeError, verify_turn
+    try:
+        result = verify_turn(resolve_backend(), model, prompt, str(cwd), timeout)
+    except SmokeError as error:
+        raise click.ClickException(str(error)) from error
+    if ctx.obj["json_output"]:
+        click.echo(json.dumps(result, sort_keys=True))
+    else:
+        click.echo(f"Model: {result['model']} · Turn: {result['turn_status']}")
+        click.echo(result["reply"])
+
+
 @cli.command(name="app-server", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.pass_context
 def app_server(ctx: click.Context) -> None:
